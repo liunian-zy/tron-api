@@ -1,4 +1,5 @@
 <?php
+
 namespace IEXBase\TronAPI;
 
 
@@ -11,38 +12,38 @@ class TronManager
      * Default Nodes
      *
      * @var array
-    */
+     */
     protected array $defaultNodes = [
-        'fullNode'      =>  'https://api.trongrid.io',
-        'solidityNode'  =>  'https://api.trongrid.io',
-        'eventServer'   =>  'https://api.trongrid.io',
-        'explorer'      =>  'https://apilist.tronscan.org',
-        'signServer'    =>  ''
+        'fullNode' => 'https://api.trongrid.io',
+        'solidityNode' => 'https://api.trongrid.io',
+        'eventServer' => 'https://api.trongrid.io',
+        'explorer' => 'https://apilist.tronscan.org',
+        'signServer' => ''
     ];
 
     /**
      * Providers
      *
      * @var array
-    */
+     */
     protected array $providers = [
-        'fullNode'      =>  [],
-        'solidityNode'  =>  [],
-        'eventServer'   =>  [],
-        'explorer'      =>  [],
-        'signServer'    =>  []
+        'fullNode' => [],
+        'solidityNode' => [],
+        'eventServer' => [],
+        'explorer' => [],
+        'signServer' => []
     ];
 
     /**
      * Status Page
      *
      * @var array
-    */
+     */
     protected array $statusPage = [
-        'fullNode'      =>  'wallet/getnowblock',
-        'solidityNode'  =>  'walletsolidity/getnowblock',
-        'eventServer'   =>  'healthcheck',
-        'explorer'      =>  'api/system/status'
+        'fullNode' => 'wallet/getnowblock',
+        'solidityNode' => 'walletsolidity/getnowblock',
+        'eventServer' => 'healthcheck',
+        'explorer' => 'api/system/status'
     ];
 
     /**
@@ -54,8 +55,7 @@ class TronManager
     {
         $this->providers = $providers;
 
-        foreach ($providers as $key => $value)
-        {
+        foreach ($providers as $key => $value) {
             //Do not skip the supplier is empty
             if ($value == null) {
                 $this->providers[$key] = new HttpProvider(
@@ -63,10 +63,10 @@ class TronManager
                 );
             };
 
-            if(is_string($providers[$key]))
+            if (is_string($providers[$key]))
                 $this->providers[$key] = new HttpProvider($value);
 
-            if(in_array($key, ['signServer']))
+            if (in_array($key, ['signServer']))
                 continue;
 
             $this->providers[$key]->setStatusPage($this->statusPage[$key]);
@@ -78,17 +78,18 @@ class TronManager
      *
      * @return array
      */
-    public function getProviders() {
+    public function getProviders()
+    {
         return $this->providers;
     }
 
     /**
      * Full Node
      *
-     * @throws TronException
      * @return HttpProviderInterface
+     * @throws TronException
      */
-    public function fullNode() : HttpProviderInterface
+    public function fullNode(): HttpProviderInterface
     {
         if (!array_key_exists('fullNode', $this->providers)) {
             throw new TronException('Full node is not activated.');
@@ -100,10 +101,10 @@ class TronManager
     /**
      * Solidity Node
      *
-     * @throws TronException
      * @return HttpProviderInterface
+     * @throws TronException
      */
-    public function solidityNode() : HttpProviderInterface
+    public function solidityNode(): HttpProviderInterface
     {
         if (!array_key_exists('solidityNode', $this->providers)) {
             throw new TronException('Solidity node is not activated.');
@@ -115,8 +116,8 @@ class TronManager
     /**
      * Sign server
      *
-     * @throws TronException
      * @return HttpProviderInterface
+     * @throws TronException
      */
     public function signServer(): HttpProviderInterface
     {
@@ -130,8 +131,8 @@ class TronManager
     /**
      * TronScan server
      *
-     * @throws TronException
      * @return HttpProviderInterface
+     * @throws TronException
      */
     public function explorer(): HttpProviderInterface
     {
@@ -145,8 +146,8 @@ class TronManager
     /**
      * Event server
      *
-     * @throws TronException
      * @return HttpProviderInterface
+     * @throws TronException
      */
     public function eventServer(): HttpProviderInterface
     {
@@ -169,15 +170,15 @@ class TronManager
     public function request($url, array $params = [], string $method = 'post')
     {
         $split = explode('/', $url);
-        if(in_array($split[0], ['walletsolidity', 'walletextension'])) {
+        if (in_array($split[0], ['walletsolidity', 'walletextension'])) {
             $response = $this->solidityNode()->request($url, $params, $method);
-        } elseif(in_array($split[0], ['event'])) {
+        } elseif (in_array($split[0], ['event']) || in_array($split[count($split) - 1], ['events'])) {
             $response = $this->eventServer()->request($url, $params, 'get');
         } elseif (in_array($split[0], ['trx-sign'])) {
             $response = $this->signServer()->request($url, $params, 'post');
-        } elseif(in_array($split[0], ['api'])) {
+        } elseif (in_array($split[0], ['api'])) {
             $response = $this->explorer()->request($url, $params, 'get');
-        }else {
+        } else {
             $response = $this->fullNode()->request($url, $params, $method);
         }
 
@@ -188,7 +189,7 @@ class TronManager
      * Check connections
      *
      * @return array
-    */
+     */
     public function isConnected(): array
     {
         $array = [];
