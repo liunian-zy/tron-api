@@ -54,7 +54,7 @@ class Tron implements TronInterface
      */
     public $address = [
         'base58' => null,
-        'hex' => null
+        'hex'    => null
     ];
 
     /**
@@ -122,10 +122,10 @@ class Tron implements TronInterface
         }
 
         $this->setManager(new TronManager($this, [
-            'fullNode' => $fullNode,
+            'fullNode'     => $fullNode,
             'solidityNode' => $solidityNode,
-            'eventServer' => $eventServer,
-            'signServer' => $signServer,
+            'eventServer'  => $eventServer,
+            'signServer'   => $signServer,
         ]));
 
         $this->transactionBuilder = new TransactionBuilder($this);
@@ -279,7 +279,7 @@ class Tron implements TronInterface
         $_fromHex = $this->hexString2Address($address);
 
         $this->address = [
-            'hex' => $_toHex,
+            'hex'    => $_toHex,
             'base58' => $_fromHex
         ];
     }
@@ -368,13 +368,12 @@ class Tron implements TronInterface
         return $this->manager->request("event/contract/{$routeParams}?since={$sinceTimestamp}&limit={$limit}");
     }
 
-    public function getEventResultNew($contractAddress, int $sinceTimestamp = 0, string $eventName = null, int $blockNumber = 0, int $limit = 200)
+    public function getEventResultNew($contractAddress, string $eventName = null, int $blockNumber = 0, int $limit = 200, ?string $fingerprint = null)
     {
         if (!$this->isValidProvider($this->manager->eventServer())) {
             throw new TronException('No event server configured');
         }
 
-        $routeParams = [];
         if ($eventName && !$contractAddress) {
             throw new TronException('Usage of event name filtering requires a contract address');
         }
@@ -382,9 +381,11 @@ class Tron implements TronInterface
         if ($blockNumber && !$eventName)
             throw new TronException('Usage of block number filtering requires an event name');
 
-
-        $routeParams = implode('/', $routeParams);
-        return $this->manager->eventServer()->request("v1/contracts/$contractAddress/events?limit=$limit&event_name=$eventName&block_number=$blockNumber");
+        $url = "v1/contracts/$contractAddress/events?limit=$limit&event_name=$eventName&block_number=$blockNumber";
+        if ($fingerprint) {
+            $url .= "&fingerprint=$fingerprint";
+        }
+        return $this->manager->eventServer()->request($url);
     }
 
     /**
@@ -677,8 +678,8 @@ class Tron implements TronInterface
 
         $response = $this->manager->request(sprintf('walletextension/gettransactions%sthis', $direction), [
             'account' => ['address' => $this->toHex($address)],
-            'limit' => $limit,
-            'offset' => $offset
+            'limit'   => $limit,
+            'offset'  => $offset
         ]);
 
         return array_merge($response, ['direction' => $direction]);
@@ -819,7 +820,7 @@ class Tron implements TronInterface
         $address = (!is_null($address) ? $address : $this->address['hex']);
 
         $transaction = $this->manager->request('wallet/updateaccount', [
-            'account_name' => $this->stringUtf8toHex($account_name),
+            'account_name'  => $this->stringUtf8toHex($account_name),
             'owner_address' => $this->toHex($address)
         ]);
 
@@ -877,19 +878,19 @@ class Tron implements TronInterface
     public function createToken($token = [])
     {
         return $this->manager->request('wallet/createassetissue', [
-            'owner_address' => $this->toHex($token['owner_address']),
-            'name' => $this->stringUtf8toHex($token['name']),
-            'abbr' => $this->stringUtf8toHex($token['abbr']),
-            'description' => $this->stringUtf8toHex($token['description']),
-            'url' => $this->stringUtf8toHex($token['url']),
-            'total_supply' => $token['total_supply'],
-            'trx_num' => $token['trx_num'],
-            'num' => $token['num'],
-            'start_time' => $token['start_time'],
-            'end_time' => $token['end_time'],
-            'free_asset_net_limit' => $token['free_asset_net_limit'],
+            'owner_address'               => $this->toHex($token['owner_address']),
+            'name'                        => $this->stringUtf8toHex($token['name']),
+            'abbr'                        => $this->stringUtf8toHex($token['abbr']),
+            'description'                 => $this->stringUtf8toHex($token['description']),
+            'url'                         => $this->stringUtf8toHex($token['url']),
+            'total_supply'                => $token['total_supply'],
+            'trx_num'                     => $token['trx_num'],
+            'num'                         => $token['num'],
+            'start_time'                  => $token['start_time'],
+            'end_time'                    => $token['end_time'],
+            'free_asset_net_limit'        => $token['free_asset_net_limit'],
             'public_free_asset_net_limit' => $token['public_free_asset_net_limit'],
-            'frozen_supply' => $token['frozen_supply']
+            'frozen_supply'               => $token['frozen_supply']
         ]);
     }
 
@@ -905,7 +906,7 @@ class Tron implements TronInterface
     public function registerAccount(string $address, string $newAccountAddress): array
     {
         return $this->manager->request('wallet/createaccount', [
-            'owner_address' => $this->toHex($address),
+            'owner_address'   => $this->toHex($address),
             'account_address' => $this->toHex($newAccountAddress)
         ]);
     }
@@ -922,7 +923,7 @@ class Tron implements TronInterface
     {
         return $this->manager->request('wallet/createwitness', [
             'owner_address' => $this->toHex($address),
-            'url' => $this->stringUtf8toHex($url)
+            'url'           => $this->stringUtf8toHex($url)
         ]);
     }
 
@@ -1130,7 +1131,7 @@ class Tron implements TronInterface
 
         return $this->manager->request('wallet/getblockbylimitnext', [
             'startNum' => intval($start),
-            'endNum' => intval($end) + 1
+            'endNum'   => intval($end) + 1
         ])['block'];
     }
 
@@ -1187,7 +1188,7 @@ class Tron implements TronInterface
 
         return $this->manager->request('wallet/getpaginatedassetissuelist', [
             'offset' => intval($offset),
-            'limit' => intval($limit)
+            'limit'  => intval($limit)
         ])['assetIssue'];
     }
 
@@ -1290,12 +1291,12 @@ class Tron implements TronInterface
         }
 
         return $this->manager->request('wallet/deploycontract', [
-            'owner_address' => $this->toHex($address),
-            'fee_limit' => $feeLimit,
-            'call_value' => $callValue,
+            'owner_address'                 => $this->toHex($address),
+            'fee_limit'                     => $feeLimit,
+            'call_value'                    => $callValue,
             'consume_user_resource_percent' => $bandwidthLimit,
-            'abi' => $abi,
-            'bytecode' => $bytecode
+            'abi'                           => $abi,
+            'bytecode'                      => $bytecode
         ]);
     }
 
@@ -1379,9 +1380,9 @@ class Tron implements TronInterface
         $addressBase58 = $this->getBase58CheckAddress($addressBin);
 
         return new TronAddress([
-            'private_key' => $priv->getPrivate('hex'),
-            'public_key' => $pubKeyHex,
-            'address_hex' => $addressHex,
+            'private_key'    => $priv->getPrivate('hex'),
+            'public_key'     => $pubKeyHex,
+            'address_hex'    => $addressHex,
             'address_base58' => $addressBase58
         ]);
     }
