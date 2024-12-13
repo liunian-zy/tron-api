@@ -327,7 +327,7 @@ class Tron implements TronInterface
 
     public function getCurrentBlockSimple(): array
     {
-        return $this->manager->request('walletsolidity/getblock', [], "GET");
+        return $this->manager->request('wallet/getblock', [], "GET");
     }
 
     /**
@@ -535,9 +535,9 @@ class Tron implements TronInterface
      * @return array
      * @throws TronException
      */
-    public function getTransactionInfo(string $transactionID): array
+    public function getTransactionInfo(string $transactionID, bool $fromFullNode = true): array
     {
-        return $this->manager->request('walletsolidity/gettransactioninfobyid', [
+        return $this->manager->request($fromFullNode ? 'wallet/gettransactioninfobyid' : 'walletsolidity/gettransactioninfobyid', [
             'value' => $transactionID
         ]);
     }
