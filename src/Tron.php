@@ -577,11 +577,11 @@ class Tron implements TronInterface
      * @return array
      * @throws TronException
      */
-    public function getAccount(string $address = null): array
+    public function getAccount(string $address = null, bool $fromFullNode = true): array
     {
         $address = (!is_null($address) ? $this->toHex($address) : $this->address['hex']);
 
-        return $this->manager->request('walletsolidity/getaccount', [
+        return $this->manager->request($fromFullNode ? 'wallet/getaccount' : 'walletsolidity/getaccount', [
             'address' => $address
         ]);
     }
@@ -594,9 +594,9 @@ class Tron implements TronInterface
      * @return float
      * @throws TronException
      */
-    public function getBalance(string $address = null, bool $fromTron = false): float
+    public function getBalance(string $address = null, bool $fromTron = false, bool $fromFullNode = true): float
     {
-        $account = $this->getAccount($address);
+        $account = $this->getAccount($address, $fromFullNode);
 
         if (!array_key_exists('balance', $account)) {
             return 0;
