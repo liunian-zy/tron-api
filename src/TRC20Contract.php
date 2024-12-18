@@ -68,7 +68,7 @@ class TRC20Contract
      *
      * @var integer
      */
-    private int $feeLimit = 10;
+    private int $feeLimit = 300;
 
     /**
      * Base Tron object
